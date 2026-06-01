@@ -18,10 +18,13 @@ const NewPlantSchema = z.object({
   species: z.string().nullable(),
   confidence: z.enum(["low", "medium", "high"]),
   care_summary: z.string(),
-  water_interval_days: z.number().int().min(1).max(60),
-  fertilize_interval_days: z.number().int().min(7).max(180),
+  water_interval_days: z.number().int().min(1).max(60).catch(7),
+  fertilize_interval_days: z.number().int().min(7).max(180).catch(30),
   suggested_custom_actions: z
-    .array(z.object({ label: z.string(), interval_days: z.number().int().min(1).max(365) }))
+    .array(z.object({
+      label: z.string(),
+      interval_days: z.number().int().min(1).transform((v) => Math.min(v, 365)).catch(365),
+    }))
     .default([]),
 });
 export type NewPlantAnalysis = z.infer<typeof NewPlantSchema>;
