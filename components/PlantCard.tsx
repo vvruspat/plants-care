@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Droplets, Sprout, Sparkles, Check } from "lucide-react";
-import { dueLabel, daysFromNow } from "@/lib/scheduling";
+import { daysFromNow } from "@/lib/scheduling";
 import { photoPublicUrl } from "@/lib/storage";
 import { markActionDone } from "@/app/actions/care";
 
@@ -80,9 +80,11 @@ function ActionRow({ schedule }: { schedule: FeedSchedule }) {
   const Icon = ICONS[schedule.kind];
   const [pending, start] = useTransition();
   const [doneLocal, setDoneLocal] = useState(false);
-  const due = dueLabel(schedule.next_due_at);
+  const days = daysFromNow(schedule.next_due_at);
+  const overdueDays = Math.abs(days);
+  const isOverdue = days < 0;
   // Show Done button when: never been done before, due tomorrow, or overdue
-  const showDone = !schedule.last_done_at || daysFromNow(schedule.next_due_at) <= 1;
+  const showDone = !schedule.last_done_at || days <= 1;
 
   function onDone() {
     start(async () => {
@@ -104,16 +106,28 @@ function ActionRow({ schedule }: { schedule: FeedSchedule }) {
           <div className={`truncate text-base font-medium ${doneLocal ? "line-through text-muted-foreground" : ""}`}>
             {schedule.label}
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mt-0.5">
+          <div className="flex flex-col gap-1 mt-0.5">
             {doneLocal ? (
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Done ✓</span>
+              <span className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">Done ✓</span>
             ) : (
               <>
-                <Badge variant={due.overdue ? "destructive" : "secondary"} className="font-normal">
-                  {due.text}
-                </Badge>
                 {schedule.last_done_by_name && (
-                  <span className="truncate">last: {schedule.last_done_by_name}</span>
+                  <span className="inline-flex">
+                    <Badge variant="outline" className="font-normal text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40">
+                      Done by {schedule.last_done_by_name}
+                    </Badge>
+                  </span>
+                )}
+                {isOverdue ? (
+                  <span className="inline-flex">
+                    <Badge variant="destructive" className="font-normal">
+                      Overdue by {overdueDays} day{overdueDays !== 1 ? "s" : ""}
+                    </Badge>
+                  </span>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    Next time in {days === 0 ? "less than a day" : `${days} day${days !== 1 ? "s" : ""}`}
+                  </span>
                 )}
               </>
             )}
