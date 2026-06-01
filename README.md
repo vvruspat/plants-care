@@ -20,7 +20,7 @@ Mobile-first web app for the Coolset office to track plant care. Built on Next.j
 
 2. **Create a Supabase project** and run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) in the SQL editor. Enable the Google OAuth provider in Authentication → Providers (use a Google Cloud OAuth client whose authorized redirect URIs include `<supabase-url>/auth/v1/callback`).
 
-3. **Create a Slack incoming webhook** pointing at `#feed-pants-care` (or whichever channel should receive overdue notifications).
+3. **Slack webhook (optional, can defer)** — leave `SLACK_WEBHOOK_URL` unset and the cron route will report overdue items as `skipped` instead of posting. Wire it up later: create an Incoming Webhook in Slack pointing at `#feed-pants-care`, paste it into env vars, redeploy.
 
 4. **Copy `.env.example` → `.env.local`** and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`

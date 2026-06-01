@@ -42,6 +42,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: true, notified: 0 });
   }
 
+  if (!process.env.SLACK_WEBHOOK_URL) {
+    return NextResponse.json({
+      ok: true,
+      notified: 0,
+      skipped: fresh.length,
+      reason: "SLACK_WEBHOOK_URL not configured",
+    });
+  }
+
   const lines = fresh.map((r) => {
     const days = Math.floor((Date.now() - new Date(r.next_due_at).getTime()) / 86_400_000);
     const where = r.plant?.location ? ` (${r.plant.location})` : "";
