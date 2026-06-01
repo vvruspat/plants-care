@@ -10,7 +10,7 @@ const client = new OpenAI({
   },
 });
 
-const MODEL = process.env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-4.5";
+const MODEL = process.env.OPENROUTER_MODEL ?? "google/gemini-3.1-flash-lite";
 
 const NewPlantSchema = z.object({
   common_name: z.string(),

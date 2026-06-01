@@ -25,7 +25,7 @@ Mobile-first web app for the Coolset office to track plant care. Built on Next.j
 4. **Copy `.env.example` → `.env.local`** and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` — server only, used by the cron route and to resolve display names
-   - `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`, default `anthropic/claude-sonnet-4.5`)
+   - `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`, default `google/gemini-3.1-flash-lite`)
    - `SLACK_WEBHOOK_URL`
    - `CRON_SECRET` — any long random string; Vercel Cron will send it as the bearer token
 
@@ -52,7 +52,7 @@ curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/over
 
 - **Next.js App Router** with server components for reads and server actions for writes
 - **Supabase**: Postgres + Auth + Storage; RLS enforces "must be authenticated", a trigger on `auth.users` blocks non-coolset emails
-- **OpenRouter** (OpenAI-compatible) calling `anthropic/claude-sonnet-4.5` for vision; the image is referenced as a public Supabase Storage URL so no base64 round-trip is needed. Swap models via `OPENROUTER_MODEL`.
+- **OpenRouter** (OpenAI-compatible) calling `google/gemini-3.1-flash-lite` for vision; the image is referenced as a public Supabase Storage URL so no base64 round-trip is needed. Swap models via `OPENROUTER_MODEL`.
 - **Slack** incoming webhook with daily de-duplication via `slack_notifications` table
 
 ## File map
