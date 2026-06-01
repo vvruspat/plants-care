@@ -54,8 +54,8 @@ export function PlantCard({ plant }: { plant: FeedPlant }) {
           )}
         </CardHeader>
         <CardContent className="pt-4 pb-2">
-          <h2 className="text-lg font-semibold leading-tight">{plant.name}</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl font-semibold leading-tight">{plant.name}</h2>
+          <p className="text-base text-muted-foreground">
             {[plant.species, plant.location].filter(Boolean).join(" · ") || "No details"}
           </p>
         </CardContent>
@@ -96,12 +96,12 @@ function ActionRow({ schedule }: { schedule: FeedSchedule }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex min-w-0 items-center gap-2">
-        <Icon className="size-4 shrink-0 text-muted-foreground" />
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <Icon className="size-5 shrink-0 text-muted-foreground" />
         <div className="min-w-0">
-          <div className="truncate text-sm font-medium">{schedule.label}</div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="truncate text-base font-medium">{schedule.label}</div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Badge variant={due.overdue ? "destructive" : "secondary"} className="font-normal">
               {due.text}
             </Badge>
