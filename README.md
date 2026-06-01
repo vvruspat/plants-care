@@ -24,7 +24,7 @@ Mobile-first web app for the Coolset office to track plant care. Built on Next.j
 
 4. **Copy `.env.example` → `.env.local`** and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` — server only, used by the cron route and to resolve display names
+   - `SUPABASE_SECRET_KEY` — server only (the new name for the legacy `service_role` key), used by the cron route and to resolve display names
    - `OPENROUTER_API_KEY` (optionally override `OPENROUTER_MODEL_IDENTIFY` / `OPENROUTER_MODEL_CHECKIN`)
    - `SLACK_WEBHOOK_URL`
    - `CRON_SECRET` — any long random string; Vercel Cron will send it as the bearer token
