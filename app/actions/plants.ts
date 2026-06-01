@@ -13,7 +13,6 @@ type CreatePlantInput = {
   primary_photo_path: string | null;
   ai_care_summary: string | null;
   water_interval_days: number;
-  fertilize_interval_days: number;
   custom_schedules: { label: string; interval_days: number }[];
 };
 
@@ -40,7 +39,6 @@ export async function createPlant(input: CreatePlantInput) {
   const now = new Date();
   const schedules = [
     { kind: "water" as const, label: "Water", interval_days: input.water_interval_days },
-    { kind: "fertilize" as const, label: "Fertilize", interval_days: input.fertilize_interval_days },
     ...input.custom_schedules.map((c) => ({
       kind: "custom" as const,
       label: c.label,
