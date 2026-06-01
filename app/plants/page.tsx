@@ -15,29 +15,43 @@ export default async function PlantsListPage() {
   return (
     <div className="flex-1">
       <AppHeader title="All Plants" />
-      <main className="mx-auto max-w-md p-4 space-y-2">
-        {(plants ?? []).map((p) => (
-          <Link
-            key={p.id}
-            href={`/plants/${p.id}`}
-            className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent"
-          >
-            <div className="size-14 shrink-0 overflow-hidden rounded-md bg-muted">
-              {p.primary_photo_path && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={photoPublicUrl(p.primary_photo_path)} alt={p.name} className="size-full object-cover" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="truncate font-medium">{p.name}</div>
-              <div className="truncate text-xs text-muted-foreground">
-                {[p.species, p.location].filter(Boolean).join(" · ") || "No details"}
-              </div>
-            </div>
-          </Link>
-        ))}
-        {(plants ?? []).length === 0 && (
+      <main className="mx-auto max-w-screen-xl p-4">
+        {(plants ?? []).length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-8">No plants yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {(plants ?? []).map((p) => {
+              const subtitle = [p.species, p.location].filter(Boolean).join(" · ");
+              return (
+                <Link
+                  key={p.id}
+                  href={`/plants/${p.id}`}
+                  className="group overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card"
+                >
+                  <div className="relative aspect-[4/3] w-full">
+                    {p.primary_photo_path ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photoPublicUrl(p.primary_photo_path)}
+                        alt={p.name}
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="size-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
+                        No photo
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 px-4 py-3">
+                      <div className="text-base font-semibold leading-tight text-white">{p.name}</div>
+                      {subtitle && (
+                        <div className="text-sm text-white/75 mt-0.5">{subtitle}</div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         )}
       </main>
     </div>

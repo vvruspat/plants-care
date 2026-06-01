@@ -87,11 +87,13 @@ export default async function Home() {
   return (
     <div className="flex-1">
       <AppHeader title="Office Plants" />
-      <main className="mx-auto max-w-md p-4 space-y-4">
+      <main className="mx-auto max-w-screen-xl p-4">
         {plants.length === 0 ? (
           <EmptyState />
         ) : (
-          plants.map((p) => <PlantCard key={p.id} plant={p} />)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {plants.map((p) => <PlantCard key={p.id} plant={p} />)}
+          </div>
         )}
       </main>
     </div>
