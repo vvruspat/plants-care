@@ -6,6 +6,7 @@ import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { recordCheckinPhoto } from "@/app/actions/photos";
 import { useRouter } from "next/navigation";
+import { compressImage } from "@/lib/compress";
 
 export function CheckinPhotoButton({ plantId }: { plantId: string }) {
   const ref = useRef<HTMLInputElement>(null);
@@ -19,9 +20,10 @@ export function CheckinPhotoButton({ plantId }: { plantId: string }) {
     setBusy(true);
     start(async () => {
       try {
+        const compressed = await compressImage(file);
         const fd = new FormData();
         fd.append("plant_id", plantId);
-        fd.append("photo", file);
+        fd.append("photo", compressed);
         const { analysis } = await recordCheckinPhoto(fd);
         toast.success(`Condition: ${analysis.condition}`);
         router.refresh();

@@ -13,6 +13,7 @@ import { Plus, Trash2, Sparkles } from "lucide-react";
 import { analyzeNewPlantPhoto } from "@/app/actions/photos";
 import { createPlant } from "@/app/actions/plants";
 import type { NewPlantAnalysis } from "@/lib/ai";
+import { compressImage } from "@/lib/compress";
 
 type CustomRow = { label: string; interval_days: number };
 
@@ -38,8 +39,9 @@ export function NewPlantForm() {
     }
     startAnalyze(async () => {
       try {
+        const compressed = await compressImage(photoFile);
         const fd = new FormData();
-        fd.append("photo", photoFile);
+        fd.append("photo", compressed);
         const { path, analysis } = await analyzeNewPlantPhoto(fd);
         setPhotoPath(path);
         setAnalysis(analysis);
