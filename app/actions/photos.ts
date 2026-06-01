@@ -1,12 +1,21 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { analyzeCheckinPhoto, analyzeNewPlant } from "@/lib/ai";
 import { PHOTO_BUCKET, photoPublicUrl } from "@/lib/storage";
 import { computeNextDue } from "@/lib/scheduling";
 
+async function ensureBucket() {
+  const admin = createSupabaseServiceClient();
+  const { data: buckets } = await admin.storage.listBuckets();
+  if (buckets?.some((b) => b.id === PHOTO_BUCKET)) return;
+  const { error } = await admin.storage.createBucket(PHOTO_BUCKET, { public: true });
+  if (error) throw new Error(`Failed to create storage bucket: ${error.message}`);
+}
+
 async function uploadPhotoFile(file: File, plantId: string): Promise<string> {
+  await ensureBucket();
   const supabase = await createSupabaseServerClient();
   const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = `plants/${plantId}/${randomUUID()}.${ext || "jpg"}`;
