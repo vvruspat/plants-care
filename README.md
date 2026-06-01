@@ -4,7 +4,7 @@ Mobile-first web app for the Coolset office to track plant care. Built on Next.j
 
 ## Features
 
-- Google sign-in restricted to `@coolset.com` accounts
+- Google OAuth or email + password sign-in, both restricted to `@coolset.com` accounts (enforced server-side by a Postgres trigger)
 - Add plants with a photo — Claude identifies the plant and suggests a watering/fertilizing schedule
 - Custom recurring or one-off care actions
 - Main feed shows what's due in the next 24 hours; tap **Done** to log it (last-done-by attribution)
