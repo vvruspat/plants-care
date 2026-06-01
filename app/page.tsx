@@ -41,15 +41,15 @@ async function resolveDisplayNames(ids: string[]): Promise<Map<string, string>> 
 
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
-  const horizon = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+  // Fetch all active schedules for all plants, ordered by urgency.
+  // Plants are sorted by their most urgent action (earliest next_due_at).
   const { data: rows } = await supabase
     .from("care_schedules")
     .select(
       "id, kind, label, next_due_at, last_done_at, last_done_by, plant:plants(id, name, primary_photo_path, species, location)",
     )
     .eq("active", true)
-    .lte("next_due_at", horizon)
     .order("next_due_at", { ascending: true })
     .returns<ScheduleRow[]>();
 
@@ -58,6 +58,9 @@ export default async function Home() {
   );
   const nameMap = await resolveDisplayNames(userIds);
 
+  // Group schedules by plant. Because rows are ordered by next_due_at,
+  // the first time we encounter a plant it carries its most urgent action,
+  // so Map insertion order gives us plants sorted by urgency for free.
   const grouped = new Map<string, FeedPlant>();
   for (const r of rows ?? []) {
     if (!r.plant) continue;
@@ -99,9 +102,7 @@ function EmptyState() {
   return (
     <div className="rounded-lg border border-dashed p-8 text-center space-y-3">
       <div className="text-3xl">🌱</div>
-      <p className="text-sm text-muted-foreground">
-        Nothing needs care in the next 24 hours. Add a new plant to get started.
-      </p>
+      <p className="text-sm text-muted-foreground">No plants yet. Add your first one!</p>
       <Button asChild>
         <Link href="/plants/new">Add a plant</Link>
       </Button>
