@@ -23,7 +23,7 @@ Mobile-first web app for the Coolset office to track plant care. Built on Next.j
 3. **Create a Slack incoming webhook** pointing at `#feed-pants-care` (or whichever channel should receive overdue notifications).
 
 4. **Copy `.env.example` → `.env.local`** and fill in:
-   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` — server only, used by the cron route and to resolve display names
    - `ANTHROPIC_API_KEY`
    - `SLACK_WEBHOOK_URL`
