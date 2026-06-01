@@ -1,65 +1,110 @@
-import Image from "next/image";
+import Link from "next/link";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
+import { AppHeader } from "@/components/AppHeader";
+import { PlantCard, type FeedPlant, type FeedSchedule } from "@/components/PlantCard";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+type ScheduleRow = {
+  id: string;
+  kind: "water" | "fertilize" | "custom";
+  label: string;
+  next_due_at: string;
+  last_done_at: string | null;
+  last_done_by: string | null;
+  plant: {
+    id: string;
+    name: string;
+    primary_photo_path: string | null;
+    species: string | null;
+    location: string | null;
+  } | null;
+};
+
+async function resolveDisplayNames(ids: string[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  if (ids.length === 0) return map;
+  try {
+    const admin = createSupabaseServiceClient();
+    const { data } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    for (const u of data?.users ?? []) {
+      if (!ids.includes(u.id)) continue;
+      const meta = (u.user_metadata ?? {}) as { full_name?: string; name?: string };
+      map.set(u.id, meta.full_name ?? meta.name ?? (u.email?.split("@")[0] ?? "someone"));
+    }
+  } catch {
+    // service role not configured; names will be omitted gracefully
+  }
+  return map;
+}
+
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+  const horizon = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: rows } = await supabase
+    .from("care_schedules")
+    .select(
+      "id, kind, label, next_due_at, last_done_at, last_done_by, plant:plants(id, name, primary_photo_path, species, location)",
+    )
+    .eq("active", true)
+    .lte("next_due_at", horizon)
+    .order("next_due_at", { ascending: true })
+    .returns<ScheduleRow[]>();
+
+  const userIds = Array.from(
+    new Set((rows ?? []).map((r) => r.last_done_by).filter((v): v is string => Boolean(v))),
+  );
+  const nameMap = await resolveDisplayNames(userIds);
+
+  const grouped = new Map<string, FeedPlant>();
+  for (const r of rows ?? []) {
+    if (!r.plant) continue;
+    const existing = grouped.get(r.plant.id) ?? {
+      id: r.plant.id,
+      name: r.plant.name,
+      primary_photo_path: r.plant.primary_photo_path,
+      species: r.plant.species,
+      location: r.plant.location,
+      schedules: [] as FeedSchedule[],
+    };
+    existing.schedules.push({
+      id: r.id,
+      kind: r.kind,
+      label: r.label,
+      next_due_at: r.next_due_at,
+      last_done_at: r.last_done_at,
+      last_done_by_name: r.last_done_by ? nameMap.get(r.last_done_by) ?? null : null,
+    });
+    grouped.set(r.plant.id, existing);
+  }
+  const plants = Array.from(grouped.values());
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex-1">
+      <AppHeader title="Office Plants" />
+      <main className="mx-auto max-w-md p-4 space-y-4">
+        {plants.length === 0 ? (
+          <EmptyState />
+        ) : (
+          plants.map((p) => <PlantCard key={p.id} plant={p} />)
+        )}
       </main>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-lg border border-dashed p-8 text-center space-y-3">
+      <div className="text-3xl">🌱</div>
+      <p className="text-sm text-muted-foreground">
+        Nothing needs care in the next 24 hours. Add a new plant to get started.
+      </p>
+      <Button asChild>
+        <Link href="/plants/new">Add a plant</Link>
+      </Button>
     </div>
   );
 }
