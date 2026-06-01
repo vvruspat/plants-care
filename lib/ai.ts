@@ -1,9 +1,16 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { z } from "zod";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    "HTTP-Referer": process.env.OPENROUTER_REFERER ?? "https://plants-care.local",
+    "X-Title": "Coolset Office Plant Care",
+  },
+});
 
-const MODEL = "claude-sonnet-4-6";
+const MODEL = process.env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-4.5";
 
 const NewPlantSchema = z.object({
   common_name: z.string(),
@@ -36,24 +43,24 @@ function extractJson(text: string): unknown {
   return JSON.parse(raw.slice(start, end + 1));
 }
 
-async function callClaudeWithImage(systemPrompt: string, imageUrl: string) {
-  const res = await client.messages.create({
+async function callWithImage(systemPrompt: string, imageUrl: string) {
+  const res = await client.chat.completions.create({
     model: MODEL,
     max_tokens: 1024,
-    system: systemPrompt,
     messages: [
+      { role: "system", content: systemPrompt },
       {
         role: "user",
         content: [
-          { type: "image", source: { type: "url", url: imageUrl } },
-          { type: "text", text: "Respond with a single JSON object only." },
+          { type: "image_url", image_url: { url: imageUrl } },
+          { type: "text", text: "Respond with a single JSON object only. No prose, no code fences." },
         ],
       },
     ],
   });
-  const textBlock = res.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") throw new Error("No text in Claude response");
-  return extractJson(textBlock.text);
+  const text = res.choices[0]?.message?.content;
+  if (!text) throw new Error("Empty response from model");
+  return extractJson(typeof text === "string" ? text : JSON.stringify(text));
 }
 
 export async function analyzeNewPlant(imageUrl: string): Promise<NewPlantAnalysis> {
@@ -69,7 +76,7 @@ Return JSON matching this shape:
   "suggested_custom_actions": [{"label": string, "interval_days": int}]
 }
 Be conservative on watering for low-confidence identifications.`;
-  const raw = await callClaudeWithImage(system, imageUrl);
+  const raw = await callWithImage(system, imageUrl);
   return NewPlantSchema.parse(raw);
 }
 
@@ -84,6 +91,6 @@ Return JSON:
   "observations": [short strings],
   "recommendations": [{"label": "human-readable action", "urgency": "now"|"soon"|"monitor"}]
 }`;
-  const raw = await callClaudeWithImage(system, imageUrl);
+  const raw = await callWithImage(system, imageUrl);
   return CheckinSchema.parse(raw);
 }

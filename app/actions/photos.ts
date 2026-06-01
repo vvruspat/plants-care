@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { analyzeCheckinPhoto, analyzeNewPlant } from "@/lib/anthropic";
+import { analyzeCheckinPhoto, analyzeNewPlant } from "@/lib/ai";
 import { PHOTO_BUCKET, photoPublicUrl } from "@/lib/storage";
 import { computeNextDue } from "@/lib/scheduling";
 

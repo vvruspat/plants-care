@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Sparkles } from "lucide-react";
 import { analyzeNewPlantPhoto } from "@/app/actions/photos";
 import { createPlant } from "@/app/actions/plants";
-import type { NewPlantAnalysis } from "@/lib/anthropic";
+import type { NewPlantAnalysis } from "@/lib/ai";
 
 type CustomRow = { label: string; interval_days: number };
 
