@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { toast } from "sonner";
@@ -83,102 +82,94 @@ export function NewPlantForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">1 · Photo</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {/* Analysis fires automatically on file selection */}
-          <PhotoUpload onFile={onFile} analyzing={analyzing} />
-          {analysis && (
-            <div className="rounded-md bg-muted p-3 text-sm space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{analysis.common_name}</span>
-                <Badge variant="outline">{analysis.confidence} confidence</Badge>
-              </div>
-              <p className="text-muted-foreground">{analysis.care_summary}</p>
+    <form onSubmit={onSubmit} className="space-y-6">
+
+      {/* ─── Photo ─────────────────────────────────────── */}
+      <Section title="Photo">
+        <PhotoUpload onFile={onFile} analyzing={analyzing} />
+        {analysis && (
+          <div className="rounded-md bg-muted p-3 text-sm space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{analysis.common_name}</span>
+              <Badge variant="outline">{analysis.confidence} confidence</Badge>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">2 · Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Field label="Name">
-            <Input value={name} onChange={(e) => setName(e.target.value)} required />
-          </Field>
-          <Field label="Species">
-            <Input value={species} onChange={(e) => setSpecies(e.target.value)} />
-          </Field>
-          <Field label="Location">
-            <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Kitchen window" />
-          </Field>
-          <Field label="Notes">
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
-          </Field>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">3 · Schedule</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Field label="Water every (days)">
-            <Input
-              type="number"
-              min={1}
-              max={60}
-              value={waterDays}
-              onChange={(e) => setWaterDays(Number(e.target.value))}
-            />
-          </Field>
-
-          <div className="space-y-2">
-            <Label>Extra actions</Label>
-            {customs.map((c, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  value={c.label}
-                  placeholder="e.g. Fertilize"
-                  onChange={(e) =>
-                    setCustoms((arr) => arr.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
-                  }
-                />
-                <Input
-                  type="number"
-                  min={1}
-                  className="w-24 shrink-0"
-                  value={c.interval_days}
-                  onChange={(e) =>
-                    setCustoms((arr) => arr.map((x, j) => (j === i ? { ...x, interval_days: Number(e.target.value) } : x)))
-                  }
-                />
-                <Button
-                  type="button"
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => setCustoms((arr) => arr.filter((_, j) => j !== i))}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setCustoms((arr) => [...arr, { label: "", interval_days: 30 }])}
-            >
-              <Plus className="mr-1 size-4" /> Add action
-            </Button>
+            <p className="text-muted-foreground">{analysis.care_summary}</p>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </Section>
+
+      <hr className="border-border" />
+
+      {/* ─── Details ───────────────────────────────────── */}
+      <Section title="Details">
+        <Field label="Name">
+          <Input value={name} onChange={(e) => setName(e.target.value)} required />
+        </Field>
+        <Field label="Species">
+          <Input value={species} onChange={(e) => setSpecies(e.target.value)} />
+        </Field>
+        <Field label="Location">
+          <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Kitchen window" />
+        </Field>
+        <Field label="Notes">
+          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+        </Field>
+      </Section>
+
+      <hr className="border-border" />
+
+      {/* ─── Schedule ──────────────────────────────────── */}
+      <Section title="Schedule">
+        <Field label="Water every (days)">
+          <Input
+            type="number"
+            min={1}
+            max={60}
+            value={waterDays}
+            onChange={(e) => setWaterDays(Number(e.target.value))}
+          />
+        </Field>
+
+        <div className="space-y-2">
+          <Label>Extra actions</Label>
+          {customs.map((c, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={c.label}
+                placeholder="e.g. Fertilize"
+                onChange={(e) =>
+                  setCustoms((arr) => arr.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                }
+              />
+              <Input
+                type="number"
+                min={1}
+                className="w-24 shrink-0"
+                value={c.interval_days}
+                onChange={(e) =>
+                  setCustoms((arr) => arr.map((x, j) => (j === i ? { ...x, interval_days: Number(e.target.value) } : x)))
+                }
+              />
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                onClick={() => setCustoms((arr) => arr.filter((_, j) => j !== i))}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCustoms((arr) => [...arr, { label: "", interval_days: 30 }])}
+          >
+            <Plus className="mr-1 size-4" /> Add action
+          </Button>
+        </div>
+      </Section>
 
       <Button type="submit" disabled={saving || analyzing} className="w-full">
         {saving ? "Saving…" : analyzing ? (
@@ -186,6 +177,15 @@ export function NewPlantForm() {
         ) : "Save plant"}
       </Button>
     </form>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
+      {children}
+    </div>
   );
 }
 
