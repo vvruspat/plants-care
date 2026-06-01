@@ -81,8 +81,8 @@ function ActionRow({ schedule }: { schedule: FeedSchedule }) {
   const [pending, start] = useTransition();
   const [doneLocal, setDoneLocal] = useState(false);
   const due = dueLabel(schedule.next_due_at);
-  // Show Done button only when action is due within 1 day or overdue
-  const showDone = daysFromNow(schedule.next_due_at) <= 1;
+  // Show Done button when: never been done before, due tomorrow, or overdue
+  const showDone = !schedule.last_done_at || daysFromNow(schedule.next_due_at) <= 1;
 
   function onDone() {
     start(async () => {
