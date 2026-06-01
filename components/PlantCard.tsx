@@ -39,7 +39,7 @@ export function PlantCard({ plant }: { plant: FeedPlant }) {
   const subtitle = [plant.species, plant.location].filter(Boolean).join(" · ");
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden pt-0">
       <Link href={`/plants/${plant.id}`} className="block">
         {/* Image with title overlaid at the bottom */}
         <div className="relative aspect-[4/3] w-full">
