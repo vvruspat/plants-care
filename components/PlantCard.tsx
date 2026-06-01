@@ -96,34 +96,48 @@ function ActionRow({ schedule }: { schedule: FeedSchedule }) {
     });
   }
 
-  if (doneLocal) {
-    return (
-      <div className="flex items-center gap-2 rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
-        <Check className="size-4" /> {schedule.label} done — thanks!
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="flex min-w-0 items-start gap-3">
         <Icon className="size-5 shrink-0 text-muted-foreground mt-0.5" />
         <div className="min-w-0">
-          <div className="truncate text-base font-medium">{schedule.label}</div>
+          <div className={`truncate text-base font-medium ${doneLocal ? "line-through text-muted-foreground" : ""}`}>
+            {schedule.label}
+          </div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mt-0.5">
-            <Badge variant={due.overdue ? "destructive" : "secondary"} className="font-normal">
-              {due.text}
-            </Badge>
-            {schedule.last_done_by_name && (
-              <span className="truncate">last: {schedule.last_done_by_name}</span>
+            {doneLocal ? (
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Done ✓</span>
+            ) : (
+              <>
+                <Badge variant={due.overdue ? "destructive" : "secondary"} className="font-normal">
+                  {due.text}
+                </Badge>
+                {schedule.last_done_by_name && (
+                  <span className="truncate">last: {schedule.last_done_by_name}</span>
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
       {showDone && (
-        <Button size="sm" onClick={onDone} disabled={pending} className="shrink-0">
-          {pending ? "…" : "Done"}
-        </Button>
+        <button
+          onClick={onDone}
+          disabled={pending || doneLocal}
+          aria-label="Mark as done"
+          className={`shrink-0 size-10 rounded-full border-2 flex items-center justify-center transition-all duration-200
+            ${doneLocal
+              ? "border-emerald-500 bg-emerald-500 text-white"
+              : "border-border text-muted-foreground hover:border-emerald-500 hover:text-emerald-500 active:scale-95"
+            }
+            disabled:pointer-events-none
+          `}
+        >
+          {pending
+            ? <span className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin block" />
+            : <Check className="size-5" />
+          }
+        </button>
       )}
     </div>
   );
