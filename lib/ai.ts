@@ -10,7 +10,8 @@ const client = new OpenAI({
   },
 });
 
-const MODEL = process.env.OPENROUTER_MODEL ?? "google/gemini-3.1-flash-lite";
+const MODEL_IDENTIFY = process.env.OPENROUTER_MODEL_IDENTIFY ?? "anthropic/claude-sonnet-4.5";
+const MODEL_CHECKIN = process.env.OPENROUTER_MODEL_CHECKIN ?? "google/gemini-3.1-flash-lite";
 
 const NewPlantSchema = z.object({
   common_name: z.string(),
@@ -43,9 +44,9 @@ function extractJson(text: string): unknown {
   return JSON.parse(raw.slice(start, end + 1));
 }
 
-async function callWithImage(systemPrompt: string, imageUrl: string) {
+async function callWithImage(model: string, systemPrompt: string, imageUrl: string) {
   const res = await client.chat.completions.create({
-    model: MODEL,
+    model,
     max_tokens: 1024,
     messages: [
       { role: "system", content: systemPrompt },
@@ -76,7 +77,7 @@ Return JSON matching this shape:
   "suggested_custom_actions": [{"label": string, "interval_days": int}]
 }
 Be conservative on watering for low-confidence identifications.`;
-  const raw = await callWithImage(system, imageUrl);
+  const raw = await callWithImage(MODEL_IDENTIFY, system, imageUrl);
   return NewPlantSchema.parse(raw);
 }
 
@@ -91,6 +92,6 @@ Return JSON:
   "observations": [short strings],
   "recommendations": [{"label": "human-readable action", "urgency": "now"|"soon"|"monitor"}]
 }`;
-  const raw = await callWithImage(system, imageUrl);
+  const raw = await callWithImage(MODEL_CHECKIN, system, imageUrl);
   return CheckinSchema.parse(raw);
 }
