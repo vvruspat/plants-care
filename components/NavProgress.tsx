@@ -4,72 +4,71 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * Thin green bar that animates along the bottom edge of its container.
- * - Starts when the browser begins navigation (history.pushState / popstate).
- * - Completes when the new route's pathname appears in the React tree.
+ * 4px green progress bar anchored to the bottom edge of its (relative) container.
+ *
+ * Starts immediately on any internal-link click (before the server responds),
+ * fakes incremental progress, then completes when usePathname signals the new
+ * route has mounted.
  */
 export function NavProgress() {
   const pathname = usePathname();
-  const [phase, setPhase] = useState<"idle" | "loading" | "done">("idle");
-  const [pct, setPct] = useState(0);
-  const ticker = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevPath = useRef(pathname);
+  const [active, setActive] = useState(false);
+  const [width, setWidth] = useState(0);
+  const ticker = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function startBar() {
     if (ticker.current) clearInterval(ticker.current);
-    let w = 12;
-    setPct(w);
-    setPhase("loading");
+    let w = 8;
+    setActive(true);
+    setWidth(w);
     ticker.current = setInterval(() => {
-      w = Math.min(w + Math.random() * 12, 85);
-      setPct(w);
-    }, 220);
+      w = Math.min(w + Math.random() * 10, 85);
+      setWidth(w);
+    }, 200);
   }
 
   function finishBar() {
     if (ticker.current) clearInterval(ticker.current);
-    setPct(100);
-    setPhase("done");
-    // allow the bar to reach 100% visually, then hide
-    setTimeout(() => setPhase("idle"), 400);
+    ticker.current = null;
+    setWidth(100);
+    setTimeout(() => {
+      setActive(false);
+      setWidth(0);
+    }, 350);
   }
 
-  // Patch history.pushState to detect soft navigation start.
+  // Fire on any internal-link click — before the server responds.
   useEffect(() => {
-    const orig = window.history.pushState.bind(window.history);
-    window.history.pushState = (...args) => {
-      orig(...args);
+    function onLinkClick(e: MouseEvent) {
+      const anchor = (e.target as Element).closest("a");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href") ?? "";
+      // Skip external, mailto, tel, hash-only, and download links.
+      if (!href || /^(https?:|mailto:|tel:|#)/.test(href)) return;
       startBar();
-    };
-    const onPop = () => startBar();
-    window.addEventListener("popstate", onPop);
-    return () => {
-      window.history.pushState = orig;
-      window.removeEventListener("popstate", onPop);
-      if (ticker.current) clearInterval(ticker.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+    document.addEventListener("click", onLinkClick, true);
+    return () => document.removeEventListener("click", onLinkClick, true);
   }, []);
 
-  // Pathname change means the new page has mounted → finish the bar.
+  // Pathname change = new page has mounted → complete the bar.
   useEffect(() => {
     if (pathname !== prevPath.current) {
       prevPath.current = pathname;
       finishBar();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  if (phase === "idle") return null;
+  if (!active) return null;
 
   return (
     <span
       aria-hidden
-      className="absolute bottom-0 left-0 h-[3px] rounded-r-full bg-green-500 transition-all ease-out"
+      className="absolute bottom-0 left-0 h-[4px] rounded-r-full bg-green-500"
       style={{
-        width: `${pct}%`,
-        transitionDuration: phase === "done" ? "200ms" : "220ms",
-        opacity: phase === "done" && pct === 100 ? 0 : 1,
+        width: `${width}%`,
+        transition: `width ${width === 100 ? 150 : 200}ms ease-out`,
       }}
     />
   );
