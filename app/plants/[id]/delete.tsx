@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deletePlant } from "@/app/actions/plants";
+import { rethrowIfRedirect } from "@/lib/redirect-error";
 
 export function DeletePlantButton({ plantId }: { plantId: string }) {
   const [pending, start] = useTransition();
@@ -14,6 +15,7 @@ export function DeletePlantButton({ plantId }: { plantId: string }) {
       try {
         await deletePlant(plantId);
       } catch (err) {
+        rethrowIfRedirect(err);
         toast.error(err instanceof Error ? err.message : "Delete failed");
       }
     });

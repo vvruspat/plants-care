@@ -1,13 +1,14 @@
 import { AppHeader } from "@/components/AppHeader";
+import { PageWrapper } from "@/components/PageWrapper";
 import { NewPlantForm } from "./form";
 
 export default function NewPlantPage() {
   return (
-    <div className="flex-1">
+    <PageWrapper>
       <AppHeader />
       <main className="mx-auto max-w-md p-4">
         <NewPlantForm />
       </main>
-    </div>
+    </PageWrapper>
   );
 }

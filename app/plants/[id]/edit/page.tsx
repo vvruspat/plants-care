@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/AppHeader";
+import { PageWrapper } from "@/components/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +32,7 @@ export default async function EditPlantPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="flex-1">
+    <PageWrapper>
       <AppHeader />
       <main className="mx-auto max-w-md p-4">
         <form action={save} className="space-y-3">
@@ -54,6 +55,6 @@ export default async function EditPlantPage({ params }: { params: Promise<{ id: 
           <Button type="submit" className="w-full">Save</Button>
         </form>
       </main>
-    </div>
+    </PageWrapper>
   );
 }

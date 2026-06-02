@@ -13,6 +13,7 @@ import { analyzeNewPlantPhoto } from "@/app/actions/photos";
 import { createPlant } from "@/app/actions/plants";
 import type { NewPlantAnalysis } from "@/lib/ai";
 import { compressImage } from "@/lib/compress";
+import { rethrowIfRedirect } from "@/lib/redirect-error";
 
 type CustomRow = { label: string; interval_days: number };
 
@@ -76,6 +77,7 @@ export function NewPlantForm() {
           custom_schedules: customs.filter((c) => c.label.trim() && c.interval_days > 0),
         });
       } catch (err) {
+        rethrowIfRedirect(err);
         toast.error(err instanceof Error ? err.message : "Failed to save");
       }
     });

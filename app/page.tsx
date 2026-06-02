@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/AppHeader";
+import { PageWrapper } from "@/components/PageWrapper";
 import { PlantCard, type FeedPlant, type FeedSchedule } from "@/components/PlantCard";
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +86,7 @@ export default async function Home() {
   const plants = Array.from(grouped.values());
 
   return (
-    <div className="flex-1">
+    <PageWrapper>
       <AppHeader />
       <main className="mx-auto max-w-screen-xl p-4">
         {plants.length === 0 ? (
@@ -96,7 +97,7 @@ export default async function Home() {
           </div>
         )}
       </main>
-    </div>
+    </PageWrapper>
   );
 }
 

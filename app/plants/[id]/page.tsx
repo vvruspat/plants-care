@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/AppHeader";
+import { PageWrapper } from "@/components/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +61,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <div className="flex-1">
+    <PageWrapper>
       <AppHeader />
       <main className="mx-auto max-w-md p-4 space-y-4">
         {plant.primary_photo_path && (
@@ -130,6 +131,6 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
           Dueness: {schedules?.map((s) => `${s.label}: ${dueLabel(s.next_due_at).text}`).join(" · ")}
         </p>
       </main>
-    </div>
+    </PageWrapper>
   );
 }
