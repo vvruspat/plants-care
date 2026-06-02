@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { AppHeader } from "@/components/AppHeader";
-import { PageWrapper } from "@/components/PageWrapper";
 import { photoPublicUrl } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +12,8 @@ export default async function PlantsListPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <PageWrapper>
-      <AppHeader />
+    <>
+
       <main className="mx-auto max-w-screen-xl p-4">
         {(plants ?? []).length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-8">No plants yet.</p>
@@ -55,6 +53,6 @@ export default async function PlantsListPage() {
           </div>
         )}
       </main>
-    </PageWrapper>
+    </>
   );
 }
