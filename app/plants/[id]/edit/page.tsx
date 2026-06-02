@@ -32,7 +32,7 @@ export default async function EditPlantPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="flex-1">
-      <AppHeader title={`Edit ${plant.name}`} />
+      <AppHeader />
       <main className="mx-auto max-w-md p-4">
         <form action={save} className="space-y-3">
           <div className="space-y-1.5">
