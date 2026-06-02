@@ -61,7 +61,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="flex-1">
-      <AppHeader title={plant.name} />
+      <AppHeader />
       <main className="mx-auto max-w-md p-4 space-y-4">
         {plant.primary_photo_path && (
           // eslint-disable-next-line @next/next/no-img-element

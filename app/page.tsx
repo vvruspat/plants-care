@@ -86,7 +86,7 @@ export default async function Home() {
 
   return (
     <div className="flex-1">
-      <AppHeader title="Office Plants" />
+      <AppHeader />
       <main className="mx-auto max-w-screen-xl p-4">
         {plants.length === 0 ? (
           <EmptyState />

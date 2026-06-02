@@ -14,7 +14,7 @@ export default async function PlantsListPage() {
 
   return (
     <div className="flex-1">
-      <AppHeader title="All Plants" />
+      <AppHeader />
       <main className="mx-auto max-w-screen-xl p-4">
         {(plants ?? []).length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-8">No plants yet.</p>
