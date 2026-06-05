@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="leaf1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#86efac"/>
+    </linearGradient>
+    <linearGradient id="leaf2" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="pot" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#9a3412"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Pot body -->
+  <path d="M196 370 L210 430 L302 430 L316 370 Z" fill="url(#pot)"/>
+  <!-- Pot rim -->
+  <rect x="188" y="358" width="136" height="20" rx="6" fill="#ea580c"/>
+  <!-- Pot highlight -->
+  <rect x="200" y="364" width="50" height="5" rx="2.5" fill="#fb923c" opacity="0.5"/>
+
+  <!-- Stem -->
+  <path d="M256 358 Q256 300 256 240" stroke="#16a34a" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- Left big leaf -->
+  <path d="M256 290 Q200 240 170 200 Q195 195 220 215 Q238 230 256 290 Z"
+        fill="url(#leaf1)"/>
+  <!-- Left leaf vein -->
+  <path d="M256 290 Q218 248 184 208" stroke="#16a34a" stroke-width="2.5" fill="none" opacity="0.6"/>
+
+  <!-- Right big leaf -->
+  <path d="M256 260 Q310 205 342 168 Q318 162 292 182 Q272 198 256 260 Z"
+        fill="url(#leaf2)"/>
+  <!-- Right leaf vein -->
+  <path d="M256 260 Q294 216 336 174" stroke="#15803d" stroke-width="2.5" fill="none" opacity="0.6"/>
+
+  <!-- Top small leaf -->
+  <path d="M256 240 Q230 200 225 168 Q248 172 258 195 Q262 215 256 240 Z"
+        fill="#86efac"/>
+
+  <!-- Water drop (subtle, bottom right of icon) -->
+  <g transform="translate(360, 360)" opacity="0.85">
+    <path d="M20 8 Q20 0 12 0 Q4 0 4 8 Q4 16 12 20 Q20 16 20 8 Z"
+          fill="#7dd3fc" transform="rotate(180, 12, 10)"/>
+  </g>
+</svg>
