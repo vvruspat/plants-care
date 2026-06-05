@@ -95,7 +95,8 @@ export function buildCareBlocks(opts: {
       elements: [
         {
           type: "button",
-          text: { type: "plain_text", text: "✅  Done", emoji: true },
+          // Show the action label on the button (truncate to Slack's 75-char limit).
+          text: { type: "plain_text", text: actionLabel.slice(0, 75), emoji: true },
           style: "primary",
           action_id: "mark_done",
           value: scheduleId,
