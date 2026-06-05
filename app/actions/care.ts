@@ -45,8 +45,9 @@ export async function markActionDone(scheduleId: string, note?: string) {
   revalidatePath("/");
   revalidatePath(`/plants/${sched.plant_id}`);
 
-  // Fire-and-forget: post to Slack without blocking the response.
-  notifySlackDone(sched.id, sched.plant_id, user).catch(() => {});
+  // Await the Slack notification — fire-and-forget doesn't work in Server Actions
+  // because Next.js closes the execution context before the promise resolves.
+  await notifySlackDone(sched.id, sched.plant_id, user);
 }
 
 async function notifySlackDone(
