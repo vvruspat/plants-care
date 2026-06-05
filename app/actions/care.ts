@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabase/server";
 import { computeNextDue } from "@/lib/scheduling";
+import { buildDoneBlocks, postMessage, postThreadReply } from "@/lib/slack";
 
 export async function markActionDone(scheduleId: string, note?: string) {
   const supabase = await createSupabaseServerClient();
@@ -43,6 +44,58 @@ export async function markActionDone(scheduleId: string, note?: string) {
 
   revalidatePath("/");
   revalidatePath(`/plants/${sched.plant_id}`);
+
+  // Fire-and-forget: post to Slack without blocking the response.
+  notifySlackDone(sched.id, sched.plant_id, user).catch(() => {});
+}
+
+async function notifySlackDone(
+  scheduleId: string,
+  plantId: string,
+  user: { id: string; email?: string; user_metadata?: Record<string, unknown> },
+) {
+  if (!process.env.SLACK_BOT_TOKEN) return;
+
+  const admin = createSupabaseServiceClient();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const [{ data: plant }, { data: sched }, { data: notif }] = await Promise.all([
+    admin.from("plants").select("name, location, primary_photo_path").eq("id", plantId).single(),
+    admin.from("care_schedules").select("label, kind").eq("id", scheduleId).single(),
+    admin
+      .from("slack_notifications")
+      .select("message_ts, channel_id")
+      .eq("schedule_id", scheduleId)
+      .eq("notified_on", today)
+      .maybeSingle(),
+  ]);
+
+  if (!plant || !sched) return;
+
+  const displayName =
+    (user.user_metadata?.full_name as string) ??
+    (user.user_metadata?.name as string) ??
+    user.email?.split("@")[0] ??
+    "Someone";
+
+  const doneBlocks = buildDoneBlocks({
+    plantName: plant.name,
+    plantLocation: plant.location,
+    primaryPhotoPath: plant.primary_photo_path,
+    actionLabel: sched.label,
+    actionKind: sched.kind as "water" | "fertilize" | "custom",
+    doneByName: displayName,
+  });
+
+  const text = `✅ ${plant.name} — ${sched.label} done by ${displayName}`;
+
+  if (notif?.message_ts && notif.channel_id) {
+    // Reply in the existing overdue notification thread.
+    await postThreadReply(notif.channel_id, notif.message_ts, text);
+  } else {
+    // No prior notification — post a standalone done message.
+    await postMessage({ blocks: doneBlocks, text });
+  }
 }
 
 export async function addCustomSchedule(plantId: string, label: string, intervalDays: number) {
