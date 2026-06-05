@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Droplets, Sprout, Sparkles } from "lucide-react";
+import { Plus, Trash2, Droplets, Sprout, Sparkles, Undo2 } from "lucide-react";
 import { toast } from "sonner";
-import { addCustomSchedule, deleteSchedule, markActionDone } from "@/app/actions/care";
+import { addCustomSchedule, deleteSchedule, markActionDone, undoLastAction } from "@/app/actions/care";
 import { dueLabel } from "@/lib/scheduling";
 import { useRouter } from "next/navigation";
 
@@ -36,6 +36,17 @@ export function ScheduleManager({ plantId, schedules }: { plantId: string; sched
       catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
     });
   }
+
+  function undo(id: string, label: string) {
+    start(async () => {
+      try {
+        await undoLastAction(id);
+        toast.success(`Undone: ${label}`);
+        router.refresh();
+      } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to undo"); }
+    });
+  }
+
   function del(id: string) {
     if (!confirm("Remove this action?")) return;
     start(async () => {
@@ -43,6 +54,7 @@ export function ScheduleManager({ plantId, schedules }: { plantId: string; sched
       catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
     });
   }
+
   function add() {
     if (!label.trim()) return;
     start(async () => {
@@ -88,6 +100,18 @@ export function ScheduleManager({ plantId, schedules }: { plantId: string; sched
               </div>
               <div className="flex items-center gap-1">
                 <Button size="sm" onClick={() => done(s.id)} disabled={pending}>Done</Button>
+                {/* Undo only visible on the plant detail page, and only when there's a previous action */}
+                {s.last_done_at && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Undo last action"
+                    disabled={pending}
+                    onClick={() => undo(s.id, s.label)}
+                  >
+                    <Undo2 className="size-4 text-muted-foreground" />
+                  </Button>
+                )}
                 <Button size="icon" variant="ghost" onClick={() => del(s.id)} disabled={pending}>
                   <Trash2 className="size-4" />
                 </Button>
