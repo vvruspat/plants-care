@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   const supabase = createSupabaseServiceClient();
 
   // 3. Resolve (or create) the Supabase user from the Slack user.
-  let userId: string;
+  let userId: string | null = null;
   let displayName: string;
 
   try {
@@ -74,8 +74,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (e) {
     console.error("User resolution failed:", e);
-    // Fall back to Slack display name, no Supabase user.
-    userId = slackUserId; // won't match a real user but lets the action proceed
+    // done_by column is nullable — keep userId as null rather than passing an invalid Slack ID.
     displayName = payload.user.name;
   }
 
@@ -96,26 +95,29 @@ export async function POST(request: NextRequest) {
 
   // 5. Mark action done.
   const now = new Date();
-  await supabase.from("care_actions").insert({
+  const { error: insertError } = await supabase.from("care_actions").insert({
     schedule_id: sched.id,
     plant_id: sched.plant_id,
     done_by: userId,
     done_at: now.toISOString(),
   });
+  if (insertError) console.error("care_actions insert failed:", insertError);
 
+  let schedUpdateError;
   if (sched.kind === "custom") {
-    await supabase.from("care_schedules")
+    ({ error: schedUpdateError } = await supabase.from("care_schedules")
       .update({ last_done_at: now.toISOString(), last_done_by: userId, active: false })
-      .eq("id", sched.id);
+      .eq("id", sched.id));
   } else {
-    await supabase.from("care_schedules")
+    ({ error: schedUpdateError } = await supabase.from("care_schedules")
       .update({
         last_done_at: now.toISOString(),
         last_done_by: userId,
         next_due_at: computeNextDue(now, sched.interval_days).toISOString(),
       })
-      .eq("id", sched.id);
+      .eq("id", sched.id));
   }
+  if (schedUpdateError) console.error("care_schedules update failed:", schedUpdateError);
 
   // 6. Replace the original Slack message with a "Done" version.
   const doneBlocks = buildDoneBlocks({
